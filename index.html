@@ -154,14 +154,14 @@
     </style>
 </head>
 <body>
-    <h1>週末大灣區盲盒體驗</h1>
+    <h1>Klook旅游盲盒體驗</h1>
 
     <div class="selectors">
         <div class="selector-group">
             <h3>選擇目的地</h3>
-            <div class="city-card selector-card" data-city="shenzhen">深圳</div>
-            <div class="city-card selector-card" data-city="guangzhou">廣州</div>
-            <div class="city-card selector-card" data-city="zhuhai">珠海</div>
+            <div class="city-card selector-card" data-city="深圳">深圳</div>
+            <div class="city-card selector-card" data-city="廣州">廣州</div>
+            <div class="city-card selector-card" data-city="珠海">珠海</div>
         </div>
 
         <div class="selector-group">
@@ -203,215 +203,250 @@
 
         // 完整行程數據（每個組合3個方案）
         const demoData = {
-            shenzhen: {
+            深圳: {
                 food: [
                     {
                         activities: [
-                            { time: "09:00", name: "老字号早茶体验", price: 120 },
-                            { time: "12:30", name: "海鲜市场美食游", price: 250 },
-                            { time: "15:00", name: "创意茶饮工作坊", price: 80 }
+                            { time: "09:00", name: "老字號早茶體驗", price: 120 },
+                            { time: "12:30", name: "海鮮市場美食遊", price: 250 },
+                            { time: "15:00", name: "創意茶飲工作坊", price: 80 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "10:00", name: "网红火锅店套餐", price: 180 },
-                            { time: "13:00", name: "夜市小吃巡礼", price: 150 },
-                            { time: "16:30", name: "甜品制作体验", price: 90 }
+                            { time: "10:00", name: "網紅火鍋店套餐", price: 180 },
+                            { time: "13:00", name: "夜市小吃巡禮", price: 150 },
+                            { time: "16:30", name: "甜品製作體驗", price: 90 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "08:30", name: "传统烧腊体验", price: 200 },
-                            { time: "11:30", name: "主题餐厅午餐", price: 180 },
-                            { time: "15:30", name: "咖啡拉花课程", price: 100 }
+                            { time: "08:30", name: "傳統燒臘體驗", price: 200 },
+                            { time: "11:30", name: "主題餐廳午餐", price: 180 },
+                            { time: "15:30", name: "咖啡拉花課程", price: 100 }
                         ]
                     }
                 ],
                 shopping: [
                     {
                         activities: [
-                            { time: "10:00", name: "万象城购物礼包", price: 500 },
-                            { time: "13:30", name: "电子市场体验", price: 300 },
-                            { time: "16:00", name: "免税店优惠券", price: 200 }
+                            { time: "10:00", name: "萬象城購物禮包", price: 500 },
+                            { time: "13:30", name: "電子市場體驗", price: 300 },
+                            { time: "16:00", name: "免稅店優惠券", price: 200 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "11:00", name: "奢侈品专卖体验", price: 800 },
-                            { time: "14:30", name: "设计师品牌店", price: 450 },
-                            { time: "17:00", name: "美妆免税套餐", price: 600 }
+                            { time: "11:00", name: "奢侈品專賣體驗", price: 800 },
+                            { time: "14:30", name: "設計師品牌店", price: 450 },
+                            { time: "17:00", name: "美妝免稅套餐", price: 600 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "09:30", name: "批发市场探秘", price: 150 },
-                            { time: "13:00", name: "潮流服饰采购", price: 400 },
-                            { time: "16:30", name: "数码产品体验", price: 350 }
+                            { time: "09:30", name: "批發市場探秘", price: 150 },
+                            { time: "13:00", name: "潮流服飾採購", price: 400 },
+                            { time: "16:30", name: "數碼產品體驗", price: 350 }
                         ]
                     }
                 ],
                 culture: [
                     {
                         activities: [
-                            { time: "09:00", name: "古城文化导览", price: 80 },
-                            { time: "12:30", name: "非遗工艺体验", price: 120 },
-                            { time: "15:30", name: "现代艺术展览", price: 100 }
+                            { time: "09:00", name: "古城文化導覽", price: 80 },
+                            { time: "12:30", name: "非遺工藝體驗", price: 120 },
+                            { time: "15:30", name: "現代藝術展覽", price: 100 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "10:30", name: "历史博物馆参观", price: 60 },
-                            { time: "13:30", name: "传统手作体验", price: 150 },
-                            { time: "16:00", name: "剧场表演门票", price: 200 }
+                            { time: "10:30", name: "歷史博物館參觀", price: 60 },
+                            { time: "13:30", name: "傳統手作體驗", price: 150 },
+                            { time: "16:00", name: "劇場表演門票", price: 200 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "08:30", name: "寺庙文化体验", price: 0 },
-                            { time: "11:00", name: "古建筑摄影游", price: 80 },
-                            { time: "15:00", name: "文创园区导览", price: 90 }
+                            { time: "08:30", name: "寺廟文化體驗", price: 0 },
+                            { time: "11:00", name: "古建築攝影遊", price: 80 },
+                            { time: "15:00", name: "文創園區導覽", price: 90 }
                         ]
                     }
                 ]
             },
-            guangzhou: {
+            廣州: {
                 culture: [
                     {
                         activities: [
-                            { time: "09:00", name: "陈家祠深度游", price: 80 },
-                            { time: "12:30", name: "粤剧文化体验", price: 120 },
-                            { time: "15:30", name: "老城区历史漫步", price: 0 }
+                            { time: "09:00", name: "遊覽廣州沙灣古鎮", price: 32 },
+                            { time: "12:30", name: "粵劇文化體驗", price: 120 },
+                            { time: "21:30", name: "永慶坊瞻雲精選酒店住宿套餐", price: 387 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "10:00", name: "博物馆导览", price: 60 },
-                            { time: "13:00", name: "传统早茶文化", price: 100 },
-                            { time: "16:00", name: "古港遗址参观", price: 50 }
+                            { time: "10:00", name: "清遠古龍峽私人導覽", price: 60 },
+                            { time: "13:00", name: "夢回嶺南遊樂場活動", price: 105 },
+                            { time: "16:00", name: "廣州珠江夜遊", price: 50 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "08:30", name: "岭南建筑探索", price: 70 },
-                            { time: "11:30", name: "非遗剪纸课程", price: 90 },
-                            { time: "15:00", name: "茶文化体验", price: 80 }
+                            { time: "08:30", name: "嶺南建築探索", price: 70 },
+                            { time: "11:30", name: "廣州陳家祠 廣州塔私人導覽一日遊", price: 796 },
+                            { time: "19:00", name: "海心沙碼頭上船夜遊", price: 614 }
                         ]
                     }
                 ],
                 food: [
-                    {
-                        activities: [
-                            { time: "09:30", name: "广州酒家早茶套餐", price: 180 },
-                            { time: "12:00", name: "陈添记鱼皮体验", price: 50 },
-                            { time: "15:00", name: "沙湾姜撞奶工作坊", price: 80 }
-                        ]
-                    },
-                    {
-                        activities: [
-                            { time: "10:00", name: "泮溪酒家点心宴", price: 220 },
-                            { time: "13:00", name: "宝华路小吃巡礼", price: 100 },
-                            { time: "16:00", name: "顺德双皮奶体验", price: 60 }
-                        ]
-                    },
-                    {
-                        activities: [
-                            { time: "08:00", name: "传统粥品早餐", price: 40 },
-                            { time: "11:30", name: "烧腊专门店体验", price: 120 },
-                            { time: "15:30", name: "糖水制作课程", price: 70 }
-                        ]
-                    }
-                ],
+    {
+        activities: [
+            { time: "09:30", name: "廣州從化聖託利温泉莊園早餐套餐", price: 621 },
+            { time: "12:00", name: "【廣州融創茂對面】廣州花都雲居酒店午餐", price: 508 },
+            { time: "15:00", name: "【近廣州塔地鐵站】廣州琶洲會展廣州塔地鐵站輕居酒店晚餐套餐", price: 813 }
+        ]
+    },
+    {
+        activities: [
+            { time: "10:00", name: "廣州出發佛山祖廟 舞獅盛宴 清暉園 華蓋步行街品地道順德美食", price: 640 },
+            { time: "13:00", name: "【近融創景區】廣東美華航空主題酒店住宿午餐", price: 633 },
+            { time: "16:00", name: "【近廣州熱雪奇蹟】廣州花都希爾頓歡朋酒店晚餐", price: 522 }
+        ]
+    },
+    {
+        activities: [
+            { time: "08:00", name: "廣州從化卓思道温泉度假酒店早餐套餐", price: 621 },
+            { time: "18:30", name: "廣州夜間美食之旅（當地人帶領）", price: 614 },
+            { time: "21:30", name: "廣州德安麗舍凱賓斯基酒店晚餐", price: 1061 }
+        ]
+    },
+    {
+        activities: [
+            { time: "09:00", name: "廣州W酒店早餐套餐", price: 1160 },
+            { time: "12:30", name: "廣州美食探索（私家小團+包車遊覽+陳家祠+永慶坊+聖心大教堂+北京路+珠江夜遊）", price: 1212 },
+            { time: "21:30", name: "廣州香格里拉飯店晚餐", price: 865 }
+        ]
+    },
+    {
+        activities: [
+            { time: "10:30", name: "清遠温泉+佛山美食", price: 299 },
+            { time: "14:00", name: "廣州增城富力萬達嘉華酒店尋味老西關美食", price: 320 },
+            { time: "17:00", name: "廣州碧桂圓希爾頓逸林酒店東莞八景美食", price: 638 }
+        ]
+    },
+    {
+        activities: [
+            { time: "08:30", name: "廣州荔灣滘口地鐵站亞朵酒店早餐套餐", price: 62 },
+            { time: "12:00", name: "廣州富力麗思卡爾頓酒店午餐", price: 198 },
+            { time: "15:30", name: "廣州卡麗酒店晚餐", price: 405 }
+        ]
+    },
+    {
+        activities: [
+            { time: "09:00", name: "廣州8號藝術曬穀場", price: 32 },
+            { time: "13:30", name: "美豪麗致酒店（廣州漢溪長隆店）午餐套餐", price: 432 },
+            { time: "16:00", name: "廣州現代城市探索", price: 410 }
+        ]
+    },
+    {
+        activities: [
+            { time: "10:00", name: "廣州中國大酒店早餐套餐", price: 1208 },
+            { time: "14:00", name: "【近廣州塔】廣州香格里拉酒店午餐套餐", price: 1678 },
+            { time: "17:30", name: "廣州卓思道酒店晚餐", price: 1056 }
+        ]
+    }
+],
                 shopping: [
                     {
                         activities: [
-                            { time: "10:00", name: "天河城购物套票", price: 400 },
-                            { time: "13:30", name: "北京路步行街礼包", price: 300 },
-                            { time: "16:00", name: "上下九手信优惠券", price: 200 }
+                            { time: "10:00", name: "天河城購物套票", price: 400 },
+                            { time: "13:30", name: "北京路步行街禮包", price: 300 },
+                            { time: "16:00", name: "上下九手信優惠券", price: 200 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "11:00", name: "太古汇奢侈品体验", price: 600 },
-                            { time: "14:30", name: "万菱批发市场探秘", price: 150 },
-                            { time: "17:00", name: "珠江新城购物券", price: 350 }
+                            { time: "11:00", name: "太古匯奢侈品體驗", price: 600 },
+                            { time: "14:30", name: "萬菱批發市場探秘", price: 150 },
+                            { time: "17:00", name: "珠江新城購物券", price: 350 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "09:30", name: "沙河服装批发", price: 250 },
-                            { time: "13:00", name: "一德路干货市场", price: 180 },
-                            { time: "16:30", name: "美妆集合店体验", price: 300 }
+                            { time: "09:30", name: "沙河服裝批發", price: 250 },
+                            { time: "13:00", name: "一德路乾貨市場", price: 180 },
+                            { time: "16:30", name: "美妝集合店體驗", price: 300 }
                         ]
                     }
                 ]
             },
-            zhuhai: {
+            珠海: {
                 shopping: [
                     {
                         activities: [
-                            { time: "10:00", name: "免税城购物券", price: 600 },
-                            { time: "13:30", name: "珠宝批发市场", price: 800 },
-                            { time: "16:00", name: "设计师集合店", price: 400 }
+                            { time: "10:00", name: "免稅城購物券", price: 600 },
+                            { time: "13:30", name: "珠寶批發市場", price: 800 },
+                            { time: "16:00", name: "設計師集合店", price: 400 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "11:00", name: "海味干货采购", price: 300 },
-                            { time: "14:00", name: "跨境商品体验", price: 500 },
+                            { time: "11:00", name: "海味乾貨採購", price: 300 },
+                            { time: "14:00", name: "跨境商品體驗", price: 500 },
                             { time: "17:00", name: "奢侈品折扣店", price: 700 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "09:30", name: "奥特莱斯优惠券", price: 450 },
-                            { time: "13:00", name: "本地特产采购", price: 200 },
-                            { time: "16:30", name: "电子产品体验", price: 350 }
+                            { time: "09:30", name: "奧特萊斯優惠券", price: 450 },
+                            { time: "13:00", name: "本地特產採購", price: 200 },
+                            { time: "16:30", name: "電子產品體驗", price: 350 }
                         ]
                     }
                 ],
                 food: [
                     {
                         activities: [
-                            { time: "10:00", name: "横琴蚝美食体验", price: 200 },
-                            { time: "12:30", name: "斗门重壳蟹套餐", price: 350 },
-                            { time: "15:00", name: "珠海渔女茶点套餐", price: 120 }
+                            { time: "10:00", name: "橫琴蠔美食體驗", price: 200 },
+                            { time: "12:30", name: "斗門重殼蟹套餐", price: 350 },
+                            { time: "15:00", name: "珠海漁女茶點套餐", price: 120 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "11:00", name: "湾仔海鲜街体验", price: 280 },
-                            { time: "13:30", name: "金悦轩早茶套餐", price: 180 },
-                            { time: "16:00", name: "澳门葡挞工作坊", price: 90 }
+                            { time: "11:00", name: "灣仔海鮮街體驗", price: 280 },
+                            { time: "13:30", name: "金悅軒早茶套餐", price: 180 },
+                            { time: "16:00", name: "澳門葡撻工作坊", price: 90 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "09:00", name: "传统茶果制作", price: 60 },
-                            { time: "12:00", name: "海鲜火锅体验", price: 320 },
-                            { time: "15:30", name: "葡式料理课程", price: 150 }
+                            { time: "09:00", name: "傳統茶果製作", price: 60 },
+                            { time: "12:00", name: "海鮮火鍋體驗", price: 320 },
+                            { time: "15:30", name: "葡式料理課程", price: 150 }
                         ]
                     }
                 ],
                 culture: [
                     {
                         activities: [
-                            { time: "09:00", name: "圆明新园导览套票", price: 100 },
-                            { time: "12:30", name: "唐家湾古镇参观", price: 0 },
-                            { time: "15:00", name: "珠海博物馆门票", price: 50 }
+                            { time: "09:00", name: "圓明新園導覽套票", price: 100 },
+                            { time: "12:30", name: "唐家灣古鎮參觀", price: 0 },
+                            { time: "15:00", name: "珠海博物館門票", price: 50 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "10:00", name: "北山村文创体验", price: 80 },
-                            { time: "13:00", name: "淇澳岛红树林导览", price: 60 },
-                            { time: "15:30", name: "容闳纪念馆参观", price: 30 }
+                            { time: "10:00", name: "北山村文創體驗", price: 80 },
+                            { time: "13:00", name: "淇澳島紅樹林導覽", price: 60 },
+                            { time: "15:30", name: "容閎紀念館參觀", price: 30 }
                         ]
                     },
                     {
                         activities: [
-                            { time: "08:30", name: "斗门古街游览", price: 0 },
+                            { time: "08:30", name: "斗門古街遊覽", price: 0 },
                             { time: "11:30", name: "水上婚嫁表演", price: 90 },
-                            { time: "15:00", name: "海洋文化展览", price: 70 }
+                            { time: "15:00", name: "海洋文化展覽", price: 70 }
                         ]
                     }
                 ]
@@ -496,7 +531,7 @@
                 resultDiv.innerHTML = `
                     <div class="highspeed-rail">
                         🚅 去程高鐵：西九龍站 → ${selectedCity} (08:00 - 08:40)
-                        <div class="price">票價：HK$ 98</div>
+                        <div class="price">票價：HK$ 200</div>
                     </div>
                     ${selectedItinerary.activities.map(a => `
                         <div class="activity-item">
@@ -506,8 +541,8 @@
                         </div>
                     `).join('')}
                     <div class="highspeed-rail">
-                        🚅 返程高鐵：${selectedCity} → 西九龍站 (20:30 - 21:10)
-                        <div class="price">票價：HK$ 98</div>
+                        🚅 返程高鐵：${selectedCity} → 西九龍站 (22:30 - 23:10)
+                        <div class="price">票價：HK$ 200</div>
                     </div>
                     <div class="total-price">
                         總價格：HK$ ${totalPrice}
