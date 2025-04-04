@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLOOK 大灣區盲盒體驗</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f8ff;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .selectors {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 800px;
+            width: 100%;
+            margin: 30px 0;
+        }
+
+        .selector-group {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .selector-card {
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .city-card.selected {
+            border-color: #4CAF50;
+            background: #E8F5E9;
+        }
+
+        .theme-card.selected {
+            border-color: #2196F3;
+            background: #E3F2FD;
+        }
+
+        /* 扭蛋機動畫樣式 */
+        .gacha-machine {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            margin: 30px 0;
+            display: none;
+            z-index: 100;
+        }
+
+        .machine-body {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80%;
+            background: #FF5722;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .egg {
+            position: absolute;
+            width: 80px;
+            height: 100px;
+            left: 50%;
+            top: 30%;
+            transform: translateX(-50%);
+            opacity: 0;
+            z-index: 2;
+            transition: all 0.5s;
+        }
+
+        @keyframes machineShake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(8deg); }
+            50% { transform: rotate(-8deg); }
+            75% { transform: rotate(4deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @keyframes eggDrop {
+            0% { top: 30%; opacity: 0; }
+            30% { top: 50%; opacity: 1; }
+            100% { top: 70%; opacity: 1; }
+        }
+
+        @keyframes eggOpen {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(15deg); }
+            100% { transform: scale(0) rotate(30deg); }
+        }
+
+        #generate-btn, .buy-button {
+            padding: 15px 40px;
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin: 10px;
+        }
+
+        .buy-button {
+            background: #4CAF50;
+        }
+
+        .itinerary-box {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .activity-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+            background: #f8f9fa;
+        }
+
+        .highspeed-rail {
+            color: #2196F3;
+            font-weight: bold;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .total-price {
+            font-size: 24px;
+            color: #FF6B6B;
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>週末大灣區盲盒體驗</h1>
+
+    <div class="selectors">
+        <div class="selector-group">
+            <h3>選擇目的地</h3>
+            <div class="city-card selector-card" data-city="shenzhen">深圳</div>
+            <div class="city-card selector-card" data-city="guangzhou">廣州</div>
+            <div class="city-card selector-card" data-city="zhuhai">珠海</div>
+        </div>
+
+        <div class="selector-group">
+            <h3>選擇主題</h3>
+            <div class="theme-card selector-card" data-theme="food">美食之旅</div>
+            <div class="theme-card selector-card" data-theme="shopping">購物狂歡</div>
+            <div class="theme-card selector-card" data-theme="culture">文化探索</div>
+        </div>
+    </div>
+
+    <button id="generate-btn">抽盲盒！</button>
+    
+    <div class="gacha-machine">
+        <div class="machine-body"></div>
+        <div class="egg">
+            <img src="https://example.com/egg.png" alt="扭蛋" style="width:100%">
+        </div>
+    </div>
+
+    <div class="itinerary-box" id="result"></div>
+
+    <audio id="shake-sound">
+        <source src="shake.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="drop-sound">
+        <source src="drop.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="open-sound">
+        <source src="open.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // 音效控制
+        const sounds = {
+            shake: document.getElementById('shake-sound'),
+            drop: document.getElementById('drop-sound'),
+            open: document.getElementById('open-sound')
+        };
+
+        // 完整行程數據（每個組合3個方案）
+        const demoData = {
+            shenzhen: {
+                food: [
+                    {
+                        activities: [
+                            { time: "09:00", name: "老字号早茶体验", price: 120 },
+                            { time: "12:30", name: "海鲜市场美食游", price: 250 },
+                            { time: "15:00", name: "创意茶饮工作坊", price: 80 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "10:00", name: "网红火锅店套餐", price: 180 },
+                            { time: "13:00", name: "夜市小吃巡礼", price: 150 },
+                            { time: "16:30", name: "甜品制作体验", price: 90 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "08:30", name: "传统烧腊体验", price: 200 },
+                            { time: "11:30", name: "主题餐厅午餐", price: 180 },
+                            { time: "15:30", name: "咖啡拉花课程", price: 100 }
+                        ]
+                    }
+                ],
+                shopping: [
+                    {
+                        activities: [
+                            { time: "10:00", name: "万象城购物礼包", price: 500 },
+                            { time: "13:30", name: "电子市场体验", price: 300 },
+                            { time: "16:00", name: "免税店优惠券", price: 200 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "11:00", name: "奢侈品专卖体验", price: 800 },
+                            { time: "14:30", name: "设计师品牌店", price: 450 },
+                            { time: "17:00", name: "美妆免税套餐", price: 600 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "09:30", name: "批发市场探秘", price: 150 },
+                            { time: "13:00", name: "潮流服饰采购", price: 400 },
+                            { time: "16:30", name: "数码产品体验", price: 350 }
+                        ]
+                    }
+                ],
+                culture: [
+                    {
+                        activities: [
+                            { time: "09:00", name: "古城文化导览", price: 80 },
+                            { time: "12:30", name: "非遗工艺体验", price: 120 },
+                            { time: "15:30", name: "现代艺术展览", price: 100 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "10:30", name: "历史博物馆参观", price: 60 },
+                            { time: "13:30", name: "传统手作体验", price: 150 },
+                            { time: "16:00", name: "剧场表演门票", price: 200 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "08:30", name: "寺庙文化体验", price: 0 },
+                            { time: "11:00", name: "古建筑摄影游", price: 80 },
+                            { time: "15:00", name: "文创园区导览", price: 90 }
+                        ]
+                    }
+                ]
+            },
+            guangzhou: {
+                culture: [
+                    {
+                        activities: [
+                            { time: "09:00", name: "陈家祠深度游", price: 80 },
+                            { time: "12:30", name: "粤剧文化体验", price: 120 },
+                            { time: "15:30", name: "老城区历史漫步", price: 0 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "10:00", name: "博物馆导览", price: 60 },
+                            { time: "13:00", name: "传统早茶文化", price: 100 },
+                            { time: "16:00", name: "古港遗址参观", price: 50 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "08:30", name: "岭南建筑探索", price: 70 },
+                            { time: "11:30", name: "非遗剪纸课程", price: 90 },
+                            { time: "15:00", name: "茶文化体验", price: 80 }
+                        ]
+                    }
+                ],
+                food: [
+                    {
+                        activities: [
+                            { time: "09:30", name: "广州酒家早茶套餐", price: 180 },
+                            { time: "12:00", name: "陈添记鱼皮体验", price: 50 },
+                            { time: "15:00", name: "沙湾姜撞奶工作坊", price: 80 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "10:00", name: "泮溪酒家点心宴", price: 220 },
+                            { time: "13:00", name: "宝华路小吃巡礼", price: 100 },
+                            { time: "16:00", name: "顺德双皮奶体验", price: 60 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "08:00", name: "传统粥品早餐", price: 40 },
+                            { time: "11:30", name: "烧腊专门店体验", price: 120 },
+                            { time: "15:30", name: "糖水制作课程", price: 70 }
+                        ]
+                    }
+                ],
+                shopping: [
+                    {
+                        activities: [
+                            { time: "10:00", name: "天河城购物套票", price: 400 },
+                            { time: "13:30", name: "北京路步行街礼包", price: 300 },
+                            { time: "16:00", name: "上下九手信优惠券", price: 200 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "11:00", name: "太古汇奢侈品体验", price: 600 },
+                            { time: "14:30", name: "万菱批发市场探秘", price: 150 },
+                            { time: "17:00", name: "珠江新城购物券", price: 350 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "09:30", name: "沙河服装批发", price: 250 },
+                            { time: "13:00", name: "一德路干货市场", price: 180 },
+                            { time: "16:30", name: "美妆集合店体验", price: 300 }
+                        ]
+                    }
+                ]
+            },
+            zhuhai: {
+                shopping: [
+                    {
+                        activities: [
+                            { time: "10:00", name: "免税城购物券", price: 600 },
+                            { time: "13:30", name: "珠宝批发市场", price: 800 },
+                            { time: "16:00", name: "设计师集合店", price: 400 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "11:00", name: "海味干货采购", price: 300 },
+                            { time: "14:00", name: "跨境商品体验", price: 500 },
+                            { time: "17:00", name: "奢侈品折扣店", price: 700 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "09:30", name: "奥特莱斯优惠券", price: 450 },
+                            { time: "13:00", name: "本地特产采购", price: 200 },
+                            { time: "16:30", name: "电子产品体验", price: 350 }
+                        ]
+                    }
+                ],
+                food: [
+                    {
+                        activities: [
+                            { time: "10:00", name: "横琴蚝美食体验", price: 200 },
+                            { time: "12:30", name: "斗门重壳蟹套餐", price: 350 },
+                            { time: "15:00", name: "珠海渔女茶点套餐", price: 120 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "11:00", name: "湾仔海鲜街体验", price: 280 },
+                            { time: "13:30", name: "金悦轩早茶套餐", price: 180 },
+                            { time: "16:00", name: "澳门葡挞工作坊", price: 90 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "09:00", name: "传统茶果制作", price: 60 },
+                            { time: "12:00", name: "海鲜火锅体验", price: 320 },
+                            { time: "15:30", name: "葡式料理课程", price: 150 }
+                        ]
+                    }
+                ],
+                culture: [
+                    {
+                        activities: [
+                            { time: "09:00", name: "圆明新园导览套票", price: 100 },
+                            { time: "12:30", name: "唐家湾古镇参观", price: 0 },
+                            { time: "15:00", name: "珠海博物馆门票", price: 50 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "10:00", name: "北山村文创体验", price: 80 },
+                            { time: "13:00", name: "淇澳岛红树林导览", price: 60 },
+                            { time: "15:30", name: "容闳纪念馆参观", price: 30 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "08:30", name: "斗门古街游览", price: 0 },
+                            { time: "11:30", name: "水上婚嫁表演", price: 90 },
+                            { time: "15:00", name: "海洋文化展览", price: 70 }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        let selectedCity = null;
+        let selectedTheme = null;
+        let isAnimating = false;
+
+        // 綁定選擇事件
+        document.querySelectorAll('.city-card').forEach(card => {
+            card.addEventListener('click', function() {
+                if(isAnimating) return;
+                document.querySelectorAll('.city-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedCity = this.dataset.city;
+            });
+        });
+
+        document.querySelectorAll('.theme-card').forEach(card => {
+            card.addEventListener('click', function() {
+                if(isAnimating) return;
+                document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedTheme = this.dataset.theme;
+            });
+        });
+
+        // 動畫控制
+        async function playGachaAnimation() {
+            return new Promise(resolve => {
+                const machine = document.querySelector('.gacha-machine');
+                const egg = document.querySelector('.egg');
+
+                // 重置狀態
+                machine.style.display = 'block';
+                egg.style.opacity = '0';
+                egg.style.top = '30%';
+                egg.style.animation = 'none';
+                machine.style.animation = 'none';
+                void machine.offsetHeight; // 強制重繪
+
+                // 啟動動畫
+                machine.style.animation = 'machineShake 1s ease-in-out';
+                egg.style.animation = 'eggDrop 1s ease-out forwards';
+
+                // 播放音效
+                sounds.shake.play();
+                setTimeout(() => sounds.drop.play(), 300);
+
+                const finishAnimation = () => {
+                    sounds.open.play();
+                    egg.style.animation = 'eggOpen 0.8s ease-out forwards';
+                    setTimeout(() => {
+                        machine.style.display = 'none';
+                        resolve();
+                    }, 800);
+                };
+
+                egg.addEventListener('animationend', finishAnimation, {once: true});
+            });
+        }
+
+        // 生成行程
+        document.getElementById('generate-btn').addEventListener('click', async () => {
+            if(isAnimating) return;
+            if(!selectedCity || !selectedTheme) return alert('請先選擇目的地和主題！');
+
+            isAnimating = true;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                resultDiv.style.display = 'none';
+                await playGachaAnimation();
+                
+                const itineraries = demoData[selectedCity][selectedTheme];
+                const randomIndex = Math.floor(Math.random() * itineraries.length);
+                const selectedItinerary = itineraries[randomIndex];
+                const totalPrice = 196 + selectedItinerary.activities.reduce((sum, a) => sum + a.price, 0);
+
+                resultDiv.innerHTML = `
+                    <div class="highspeed-rail">
+                        🚅 去程高鐵：西九龍站 → ${selectedCity} (08:00 - 08:40)
+                        <div class="price">票價：HK$ 98</div>
+                    </div>
+                    ${selectedItinerary.activities.map(a => `
+                        <div class="activity-item">
+                            <div class="time">${a.time}</div>
+                            <div class="name">${a.name}</div>
+                            <div class="price">KLOOK套票價格：HK$ ${a.price}</div>
+                        </div>
+                    `).join('')}
+                    <div class="highspeed-rail">
+                        🚅 返程高鐵：${selectedCity} → 西九龍站 (20:30 - 21:10)
+                        <div class="price">票價：HK$ 98</div>
+                    </div>
+                    <div class="total-price">
+                        總價格：HK$ ${totalPrice}
+                    </div>
+                    <button class="buy-button" onclick="handlePurchase()">一鍵購買</button>
+                `;
+                resultDiv.style.display = 'block';
+                
+            } catch (error) {
+                console.error('流程錯誤:', error);
+                alert('發生錯誤，請刷新頁面重試');
+            } finally {
+                isAnimating = false;
+            }
+        });
+
+        // 購買功能
+        window.handlePurchase = () => {
+            alert('即將跳轉至支付頁面！\n此為演示功能，實際需接入支付接口');
+        }
+    </script>
+</body>
+</html>
