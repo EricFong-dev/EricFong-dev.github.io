@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLOOK 大灣區盲盒體驗</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f8ff;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .selectors {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 800px;
+            width: 100%;
+            margin: 30px 0;
+        }
+
+        .selector-group {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .selector-card {
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .city-card.selected {
+            border-color: #4CAF50;
+            background: #E8F5E9;
+        }
+
+        .theme-card.selected {
+            border-color: #2196F3;
+            background: #E3F2FD;
+        }
+
+        /* 扭蛋機動畫樣式 */
+        .gacha-machine {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            margin: 30px 0;
+            display: none;
+            z-index: 100;
+        }
+
+        .machine-body {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80%;
+            background: #FF5722;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .egg {
+            position: absolute;
+            width: 80px;
+            height: 100px;
+            left: 50%;
+            top: 30%;
+            transform: translateX(-50%);
+            opacity: 0;
+            z-index: 2;
+            transition: all 0.5s;
+        }
+
+        @keyframes machineShake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(8deg); }
+            50% { transform: rotate(-8deg); }
+            75% { transform: rotate(4deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @keyframes eggDrop {
+            0% { top: 30%; opacity: 0; }
+            30% { top: 50%; opacity: 1; }
+            100% { top: 70%; opacity: 1; }
+        }
+
+        @keyframes eggOpen {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(15deg); }
+            100% { transform: scale(0) rotate(30deg); }
+        }
+
+        #generate-btn, .buy-button {
+            padding: 15px 40px;
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin: 10px;
+        }
+
+        .buy-button {
+            background: #4CAF50;
+        }
+
+        .itinerary-box {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .activity-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+            background: #f8f9fa;
+        }
+
+        .highspeed-rail {
+            color: #2196F3;
+            font-weight: bold;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .total-price {
+            font-size: 24px;
+            color: #FF6B6B;
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Klook旅游盲盒體驗</h1>
+
+    <div class="selectors">
+        <div class="selector-group">
+            <h3>選擇目的地</h3>
+            <div class="city-card selector-card" data-city="深圳">深圳</div>
+            <div class="city-card selector-card" data-city="廣州">廣州</div>
+            <div class="city-card selector-card" data-city="珠海">珠海</div>
+        </div>
+
+        <div class="selector-group">
+            <h3>選擇主題</h3>
+            <div class="theme-card selector-card" data-theme="food">美食之旅</div>
+            <div class="theme-card selector-card" data-theme="shopping">購物狂歡</div>
+            <div class="theme-card selector-card" data-theme="culture">文化探索</div>
+        </div>
+    </div>
+
+    <button id="generate-btn">抽盲盒！</button>
+    
+    <div class="gacha-machine">
+        <div class="machine-body"></div>
+        <div class="egg">
+            <img src="https://example.com/egg.png" alt="扭蛋" style="width:100%">
+        </div>
+    </div>
+
+    <div class="itinerary-box" id="result"></div>
+
+    <audio id="shake-sound">
+        <source src="shake.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="drop-sound">
+        <source src="drop.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="open-sound">
+        <source src="open.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // 音效控制
+        const sounds = {
+            shake: document.getElementById('shake-sound'),
+            drop: document.getElementById('drop-sound'),
+            open: document.getElementById('open-sound')
+        };
+
+        // 完整行程數據（每個組合3個方案）
+        const demoData = {
+            深圳: {
+                food: [
+                    {
+                        activities: [
+                            { time: "09:00", name: "老字號早茶體驗", price: 120 },
+                            { time: "12:30", name: "海鮮市場美食遊", price: 250 },
+                            { time: "15:00", name: "創意茶飲工作坊", price: 80 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "10:00", name: "網紅火鍋店套餐", price: 180 },
+                            { time: "13:00", name: "夜市小吃巡禮", price: 150 },
+                            { time: "16:30", name: "甜品製作體驗", price: 90 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "08:30", name: "傳統燒臘體驗", price: 200 },
+                            { time: "11:30", name: "主題餐廳午餐", price: 180 },
+                            { time: "15:30", name: "咖啡拉花課程", price: 100 }
+                        ]
+                    }
+                ],
+                shopping: [
+                    {
+                        activities: [
+                            { time: "10:00", name: "萬象城購物禮包", price: 500 },
+                            { time: "13:30", name: "電子市場體驗", price: 300 },
+                            { time: "16:00", name: "免稅店優惠券", price: 200 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "11:00", name: "奢侈品專賣體驗", price: 800 },
+                            { time: "14:30", name: "設計師品牌店", price: 450 },
+                            { time: "17:00", name: "美妝免稅套餐", price: 600 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "09:30", name: "批發市場探秘", price: 150 },
+                            { time: "13:00", name: "潮流服飾採購", price: 400 },
+                            { time: "16:30", name: "數碼產品體驗", price: 350 }
+                        ]
+                    }
+                ],
+                culture: [
+                    {
+                        activities: [
+                            { time: "09:00", name: "古城文化導覽", price: 80 },
+                            { time: "12:30", name: "非遺工藝體驗", price: 120 },
+                            { time: "15:30", name: "現代藝術展覽", price: 100 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "10:30", name: "歷史博物館參觀", price: 60 },
+                            { time: "13:30", name: "傳統手作體驗", price: 150 },
+                            { time: "16:00", name: "劇場表演門票", price: 200 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "08:30", name: "寺廟文化體驗", price: 0 },
+                            { time: "11:00", name: "古建築攝影遊", price: 80 },
+                            { time: "15:00", name: "文創園區導覽", price: 90 }
+                        ]
+                    }
+                ]
+            },
+            廣州: {
+                culture: [
+                    {
+                        activities: [
+                            { time: "09:00", name: "遊覽廣州沙灣古鎮", price: 32 },
+                            { time: "12:30", name: "粵劇文化體驗", price: 120 },
+                            { time: "21:30", name: "永慶坊瞻雲精選酒店住宿套餐", price: 387 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "10:00", name: "清遠古龍峽私人導覽", price: 60 },
+                            { time: "13:00", name: "夢回嶺南遊樂場活動", price: 105 },
+                            { time: "16:00", name: "廣州珠江夜遊", price: 50 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "08:30", name: "嶺南建築探索", price: 70 },
+                            { time: "11:30", name: "廣州陳家祠 廣州塔私人導覽一日遊", price: 796 },
+                            { time: "19:00", name: "海心沙碼頭上船夜遊", price: 614 }
+                        ]
+                    }
+                ],
+                food: [
+    {
+        activities: [
+            { time: "09:30", name: "廣州從化聖託利温泉莊園早餐套餐", price: 621 },
+            { time: "12:00", name: "【廣州融創茂對面】廣州花都雲居酒店午餐", price: 508 },
+            { time: "15:00", name: "【近廣州塔地鐵站】廣州琶洲會展廣州塔地鐵站輕居酒店晚餐套餐", price: 813 }
+        ]
+    },
+    {
+        activities: [
+            { time: "10:00", name: "廣州出發佛山祖廟 舞獅盛宴 清暉園 華蓋步行街品地道順德美食", price: 640 },
+            { time: "13:00", name: "【近融創景區】廣東美華航空主題酒店住宿午餐", price: 633 },
+            { time: "16:00", name: "【近廣州熱雪奇蹟】廣州花都希爾頓歡朋酒店晚餐", price: 522 }
+        ]
+    },
+    {
+        activities: [
+            { time: "08:00", name: "廣州從化卓思道温泉度假酒店早餐套餐", price: 621 },
+            { time: "18:30", name: "廣州夜間美食之旅（當地人帶領）", price: 614 },
+            { time: "21:30", name: "廣州德安麗舍凱賓斯基酒店晚餐", price: 1061 }
+        ]
+    },
+    {
+        activities: [
+            { time: "09:00", name: "廣州W酒店早餐套餐", price: 1160 },
+            { time: "12:30", name: "廣州美食探索（私家小團+包車遊覽+陳家祠+永慶坊+聖心大教堂+北京路+珠江夜遊）", price: 1212 },
+            { time: "21:30", name: "廣州香格里拉飯店晚餐", price: 865 }
+        ]
+    },
+    {
+        activities: [
+            { time: "10:30", name: "清遠温泉+佛山美食", price: 299 },
+            { time: "14:00", name: "廣州增城富力萬達嘉華酒店尋味老西關美食", price: 320 },
+            { time: "17:00", name: "廣州碧桂圓希爾頓逸林酒店東莞八景美食", price: 638 }
+        ]
+    },
+    {
+        activities: [
+            { time: "08:30", name: "廣州荔灣滘口地鐵站亞朵酒店早餐套餐", price: 62 },
+            { time: "12:00", name: "廣州富力麗思卡爾頓酒店午餐", price: 198 },
+            { time: "15:30", name: "廣州卡麗酒店晚餐", price: 405 }
+        ]
+    },
+    {
+        activities: [
+            { time: "09:00", name: "廣州8號藝術曬穀場", price: 32 },
+            { time: "13:30", name: "美豪麗致酒店（廣州漢溪長隆店）午餐套餐", price: 432 },
+            { time: "16:00", name: "廣州現代城市探索", price: 410 }
+        ]
+    },
+    {
+        activities: [
+            { time: "10:00", name: "廣州中國大酒店早餐套餐", price: 1208 },
+            { time: "14:00", name: "【近廣州塔】廣州香格里拉酒店午餐套餐", price: 1678 },
+            { time: "17:30", name: "廣州卓思道酒店晚餐", price: 1056 }
+        ]
+    }
+],
+                shopping: [
+                    {
+                        activities: [
+                            { time: "10:00", name: "天河城購物套票", price: 400 },
+                            { time: "13:30", name: "北京路步行街禮包", price: 300 },
+                            { time: "16:00", name: "上下九手信優惠券", price: 200 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "11:00", name: "太古匯奢侈品體驗", price: 600 },
+                            { time: "14:30", name: "萬菱批發市場探秘", price: 150 },
+                            { time: "17:00", name: "珠江新城購物券", price: 350 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "09:30", name: "沙河服裝批發", price: 250 },
+                            { time: "13:00", name: "一德路乾貨市場", price: 180 },
+                            { time: "16:30", name: "美妝集合店體驗", price: 300 }
+                        ]
+                    }
+                ]
+            },
+            珠海: {
+                shopping: [
+                    {
+                        activities: [
+                            { time: "10:00", name: "免稅城購物券", price: 600 },
+                            { time: "13:30", name: "珠寶批發市場", price: 800 },
+                            { time: "16:00", name: "設計師集合店", price: 400 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "11:00", name: "海味乾貨採購", price: 300 },
+                            { time: "14:00", name: "跨境商品體驗", price: 500 },
+                            { time: "17:00", name: "奢侈品折扣店", price: 700 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "09:30", name: "奧特萊斯優惠券", price: 450 },
+                            { time: "13:00", name: "本地特產採購", price: 200 },
+                            { time: "16:30", name: "電子產品體驗", price: 350 }
+                        ]
+                    }
+                ],
+                food: [
+                    {
+                        activities: [
+                            { time: "10:00", name: "橫琴蠔美食體驗", price: 200 },
+                            { time: "12:30", name: "斗門重殼蟹套餐", price: 350 },
+                            { time: "15:00", name: "珠海漁女茶點套餐", price: 120 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "11:00", name: "灣仔海鮮街體驗", price: 280 },
+                            { time: "13:30", name: "金悅軒早茶套餐", price: 180 },
+                            { time: "16:00", name: "澳門葡撻工作坊", price: 90 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "09:00", name: "傳統茶果製作", price: 60 },
+                            { time: "12:00", name: "海鮮火鍋體驗", price: 320 },
+                            { time: "15:30", name: "葡式料理課程", price: 150 }
+                        ]
+                    }
+                ],
+                culture: [
+                    {
+                        activities: [
+                            { time: "09:00", name: "圓明新園導覽套票", price: 100 },
+                            { time: "12:30", name: "唐家灣古鎮參觀", price: 0 },
+                            { time: "15:00", name: "珠海博物館門票", price: 50 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "10:00", name: "北山村文創體驗", price: 80 },
+                            { time: "13:00", name: "淇澳島紅樹林導覽", price: 60 },
+                            { time: "15:30", name: "容閎紀念館參觀", price: 30 }
+                        ]
+                    },
+                    {
+                        activities: [
+                            { time: "08:30", name: "斗門古街遊覽", price: 0 },
+                            { time: "11:30", name: "水上婚嫁表演", price: 90 },
+                            { time: "15:00", name: "海洋文化展覽", price: 70 }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        let selectedCity = null;
+        let selectedTheme = null;
+        let isAnimating = false;
+
+        // 綁定選擇事件
+        document.querySelectorAll('.city-card').forEach(card => {
+            card.addEventListener('click', function() {
+                if(isAnimating) return;
+                document.querySelectorAll('.city-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedCity = this.dataset.city;
+            });
+        });
+
+        document.querySelectorAll('.theme-card').forEach(card => {
+            card.addEventListener('click', function() {
+                if(isAnimating) return;
+                document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedTheme = this.dataset.theme;
+            });
+        });
+
+        // 動畫控制
+        async function playGachaAnimation() {
+            return new Promise(resolve => {
+                const machine = document.querySelector('.gacha-machine');
+                const egg = document.querySelector('.egg');
+
+                // 重置狀態
+                machine.style.display = 'block';
+                egg.style.opacity = '0';
+                egg.style.top = '30%';
+                egg.style.animation = 'none';
+                machine.style.animation = 'none';
+                void machine.offsetHeight; // 強制重繪
+
+                // 啟動動畫
+                machine.style.animation = 'machineShake 1s ease-in-out';
+                egg.style.animation = 'eggDrop 1s ease-out forwards';
+
+                // 播放音效
+                sounds.shake.play();
+                setTimeout(() => sounds.drop.play(), 300);
+
+                const finishAnimation = () => {
+                    sounds.open.play();
+                    egg.style.animation = 'eggOpen 0.8s ease-out forwards';
+                    setTimeout(() => {
+                        machine.style.display = 'none';
+                        resolve();
+                    }, 800);
+                };
+
+                egg.addEventListener('animationend', finishAnimation, {once: true});
+            });
+        }
+
+        // 生成行程
+        document.getElementById('generate-btn').addEventListener('click', async () => {
+            if(isAnimating) return;
+            if(!selectedCity || !selectedTheme) return alert('請先選擇目的地和主題！');
+
+            isAnimating = true;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                resultDiv.style.display = 'none';
+                await playGachaAnimation();
+                
+                const itineraries = demoData[selectedCity][selectedTheme];
+                const randomIndex = Math.floor(Math.random() * itineraries.length);
+                const selectedItinerary = itineraries[randomIndex];
+                const totalPrice = 196 + selectedItinerary.activities.reduce((sum, a) => sum + a.price, 0);
+
+                resultDiv.innerHTML = `
+                    <div class="highspeed-rail">
+                        🚅 去程高鐵：西九龍站 → ${selectedCity} (08:00 - 08:40)
+                        <div class="price">票價：HK$ 200</div>
+                    </div>
+                    ${selectedItinerary.activities.map(a => `
+                        <div class="activity-item">
+                            <div class="time">${a.time}</div>
+                            <div class="name">${a.name}</div>
+                            <div class="price">KLOOK套票價格：HK$ ${a.price}</div>
+                        </div>
+                    `).join('')}
+                    <div class="highspeed-rail">
+                        🚅 返程高鐵：${selectedCity} → 西九龍站 (22:30 - 23:10)
+                        <div class="price">票價：HK$ 200</div>
+                    </div>
+                    <div class="total-price">
+                        總價格：HK$ ${totalPrice}
+                    </div>
+                    <button class="buy-button" onclick="handlePurchase()">一鍵購買</button>
+                `;
+                resultDiv.style.display = 'block';
+                
+            } catch (error) {
+                console.error('流程錯誤:', error);
+                alert('發生錯誤，請刷新頁面重試');
+            } finally {
+                isAnimating = false;
+            }
+        });
+
+        // 購買功能
+        window.handlePurchase = () => {
+            alert('即將跳轉至支付頁面！\n此為演示功能，實際需接入支付接口');
+        }
+    </script>
+</body>
+</html>
