@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLOOK旅遊盲盒</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            color: #333;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        h1 {
+            color: #FF6700;
+            margin-bottom: 30px;
+        }
+
+        .city-selection {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .city-option {
+            margin: 0 15px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .city-option input {
+            display: none;
+        }
+
+        .city-option label {
+            display: block;
+            padding: 10px 20px;
+            background-color: #f5f5f5;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .city-option input:checked + label {
+            background-color: #FF6700;
+            color: white;
+        }
+
+        .city-option .checkmark {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 25px;
+            height: 25px;
+            display: none;
+        }
+
+        .city-option input:checked ~ .checkmark {
+            display: block;
+        }
+
+        .machine-container {
+            position: relative;
+            margin: 30px auto;
+            width: 300px;
+            height: 400px;
+        }
+
+        .machine {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .wheel {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            right: 60px;
+            top: 120px;
+            cursor: pointer;
+            transition: transform 0.5s;
+        }
+
+        .wheel:hover {
+            transform: scale(1.1);
+        }
+
+        .wheel.spin {
+            transform: rotate(180deg);
+        }
+
+        .result-container {
+            display: none;
+        }
+
+        .result-box {
+            border: 2px dashed #FF6700;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .discount-price {
+            color: #FF6700;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .total-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .btn {
+            background-color: #FF6700;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #e55c00;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: #FF6700;
+            border: 2px solid #FF6700;
+            margin-left: 15px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #FFF5F0;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>KLOOK旅遊盲盒</h1>
+        
+        <div id="selection-screen">
+            <div class="city-selection">
+                <div class="city-option">
+                    <input type="radio" id="shenzhen" name="city" value="shenzhen">
+                    <label for="shenzhen">深圳</label>
+                    <img src="pickedpig.png" class="checkmark" alt="已選">
+                </div>
+                <div class="city-option">
+                    <input type="radio" id="guangzhou" name="city" value="guangzhou">
+                    <label for="guangzhou">廣州</label>
+                    <img src="pickedpig.png" class="checkmark" alt="已選">
+                </div>
+                <div class="city-option">
+                    <input type="radio" id="zhuhai" name="city" value="zhuhai">
+                    <label for="zhuhai">珠海</label>
+                    <img src="pickedpig.png" class="checkmark" alt="已選">
+                </div>
+            </div>
+            
+            <div class="machine-container">
+                <img src="machine.png" class="machine" alt="扭蛋機">
+                <img src="wheel.png" class="wheel" alt="旋轉扭蛋" id="wheel">
+            </div>
+            
+            <p>選擇城市後，點擊扭蛋機旋鈕抽取你的旅遊盲盒！</p>
+        </div>
+        
+        <div id="result-screen" class="result-container">
+            <h2 id="result-city">你的旅遊盲盒</h2>
+            <div class="result-box">
+                <div class="result-item">
+                    <h3>高鐵票</h3>
+                    <p id="train-ticket">香港西九龍站 ↔ <span id="city-name">深圳</span>北站</p>
+                    <p class="original-price">價格: <span id="original-train-price">$100</span></p>
+                </div>
+                
+                <div class="result-item">
+                    <h3>活動體驗</h3>
+                    <p id="activity">深圳歡樂谷一日門票</p>
+                    <p class="original-price">價格: <span id="original-activity-price">$200</span></p>
+                </div>
+                
+                <div class="total-price">
+                    總價: <span class="original-price"><span id="total-original-price">$300</span></span>
+                    <br>
+                    <span class="discount-price"><span id="discount-rate">8折</span> 優惠價: <span id="total-discount-price">$240</span></span>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn" id="replay-btn">重抽盲盒</button>
+                <button class="btn btn-secondary" id="book-now-btn">立即預訂</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 盲盒數據
+        const blindBoxData = {
+            shenzhen: [
+                {
+                    trainTicket: "香港西九龍站 ↔ 深圳北站",
+                    trainPrice: 100,
+                    activity: "深圳歡樂谷一日門票",
+                    activityPrice: 200
+                },
+                {
+                    trainTicket: "香港西九龍站 ↔ 福田站",
+                    trainPrice: 90,
+                    activity: "世界之窗門票",
+                    activityPrice: 180
+                },
+                {
+                    trainTicket: "香港西九龍站 ↔ 深圳站",
+                    trainPrice: 80,
+                    activity: "深圳野生動物園門票",
+                    activityPrice: 150
+                },
+                {
+                    trainTicket: "香港西九龍站 ↔ 深圳北站 (商務座)",
+                    trainPrice: 200,
+                    activity: "深圳平安金融中心觀景台門票",
+                    activityPrice: 250
+                }
+            ],
+            guangzhou: [
+                {
+                    trainTicket: "香港西九龍站 ↔ 廣州南站",
+                    trainPrice: 220,
+                    activity: "廣州塔觀景門票",
+                    activityPrice: 150
+                },
+                {
+                    trainTicket: "香港西九龍站 ↔ 廣州東站",
+                    trainPrice: 210,
+                    activity: "長隆野生動物世界門票",
+                    activityPrice: 300
+                },
+                {
+                    trainTicket: "香港西九龍站 ↔ 廣州南站 (商務座)",
+                    trainPrice: 350,
+                    activity: "珠江夜遊船票",
+                    activityPrice: 120
+                },
+                {
+                    trainTicket: "香港西九龍站 ↔ 廣州南站",
+                    trainPrice: 220,
+                    activity: "沙面島文化之旅",
+                    activityPrice: 80
+                }
+            ],
+            zhuhai: [
+                {
+                    trainTicket: "香港西九龍站 ↔ 珠海站",
+                    trainPrice: 150,
+                    activity: "珠海長隆海洋王國門票",
+                    activityPrice: 350
+                },
+                {
+                    trainTicket: "香港西九龍站 ↔ 珠海站 (商務座)",
+                    trainPrice: 250,
+                    activity: "澳門一日遊 (含船票)",
+                    activityPrice: 280
+                },
+                {
+                    trainTicket: "香港西九龍站 ↔ 珠海站",
+                    trainPrice: 150,
+                    activity: "情侶路海濱觀光",
+                    activityPrice: 50
+                },
+                {
+                    trainTicket: "香港西九龍站 ↔ 珠海北站",
+                    trainPrice: 130,
+                    activity: "圓明新園門票",
+                    activityPrice: 120
+                }
+            ]
+        };
+
+        // 折扣選項
+        const discounts = [
+            { rate: 0.95, text: "95折" },
+            { rate: 0.9, text: "9折" },
+            { rate: 0.85, text: "85折" },
+            { rate: 0.8, text: "8折" }
+        ];
+
+        // DOM元素
+        const wheel = document.getElementById('wheel');
+        const selectionScreen = document.getElementById('selection-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const replayBtn = document.getElementById('replay-btn');
+        const bookNowBtn = document.getElementById('book-now-btn');
+        const cityRadios = document.querySelectorAll('input[name="city"]');
+        
+        // 結果顯示元素
+        const resultCity = document.getElementById('result-city');
+        const cityName = document.getElementById('city-name');
+        const trainTicket = document.getElementById('train-ticket');
+        const originalTrainPrice = document.getElementById('original-train-price');
+        const activity = document.getElementById('activity');
+        const originalActivityPrice = document.getElementById('original-activity-price');
+        const totalOriginalPrice = document.getElementById('total-original-price');
+        const discountRate = document.getElementById('discount-rate');
+        const totalDiscountPrice = document.getElementById('total-discount-price');
+
+        // 旋轉扭蛋按鈕事件
+        wheel.addEventListener('click', function() {
+            // 檢查是否已選擇城市
+            let selectedCity = null;
+            cityRadios.forEach(radio => {
+                if (radio.checked) {
+                    selectedCity = radio.value;
+                }
+            });
+            
+            if (!selectedCity) {
+                alert('請先選擇一個城市！');
+                return;
+            }
+            
+            // 旋轉動畫
+            wheel.classList.add('spin');
+            
+            // 延遲顯示結果
+            setTimeout(() => {
+                // 隨機選擇盲盒
+                const cityData = blindBoxData[selectedCity];
+                const randomBox = cityData[Math.floor(Math.random() * cityData.length)];
+                
+                // 隨機選擇折扣
+                const randomDiscount = discounts[Math.floor(Math.random() * discounts.length)];
+                
+                // 計算總價
+                const totalPrice = randomBox.trainPrice + randomBox.activityPrice;
+                const discountedPrice = Math.round(totalPrice * randomDiscount.rate);
+                
+                // 更新顯示內容
+                const cityNames = {
+                    shenzhen: "深圳",
+                    guangzhou: "廣州",
+                    zhuhai: "珠海"
+                };
+                
+                resultCity.textContent = `${cityNames[selectedCity]}旅遊盲盒`;
+                cityName.textContent = cityNames[selectedCity];
+                trainTicket.textContent = randomBox.trainTicket;
+                originalTrainPrice.textContent = `$${randomBox.trainPrice}`;
+                activity.textContent = randomBox.activity;
+                originalActivityPrice.textContent = `$${randomBox.activityPrice}`;
+                totalOriginalPrice.textContent = `$${totalPrice}`;
+                discountRate.textContent = randomDiscount.text;
+                totalDiscountPrice.textContent = `$${discountedPrice}`;
+                
+                // 切換畫面
+                selectionScreen.style.display = 'none';
+                resultScreen.style.display = 'block';
+                resultScreen.classList.add('fade-in');
+                
+                // 重置旋鈕
+                setTimeout(() => {
+                    wheel.classList.remove('spin');
+                }, 500);
+            }, 500);
+        });
+        
+        // 重抽按鈕事件
+        replayBtn.addEventListener('click', function() {
+            resultScreen.style.display = 'none';
+            selectionScreen.style.display = 'block';
+            selectionScreen.classList.add('fade-in');
+        });
+        
+        // 立即預訂按鈕事件
+        bookNowBtn.addEventListener('click', function() {
+            window.location.href = "https://www.klook.com/";
+        });
+    </script>
+</body>
+</html>
