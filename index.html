@@ -34,7 +34,15 @@
 
         h1 {
             color: #FF6700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #FF6700;
+            font-size: 1.2em;
+            margin-top: -10px;
             margin-bottom: 30px;
+            font-weight: normal;
         }
 
         .city-selection {
@@ -70,8 +78,8 @@
 
         .city-option .checkmark {
             position: absolute;
-            bottom: -10px;    /* 從 top 改為 bottom */
-            left: -10px;      /* 從 right 改為 left */
+            bottom: -10px;
+            left: -10px;
             width: 25px;
             height: 25px;
             display: none;
@@ -127,12 +135,19 @@
         }
 
         .result-item {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
         }
 
         .original-price {
             text-decoration: line-through;
             color: #999;
+            margin-left: 10px;
         }
 
         .discount-price {
@@ -144,7 +159,9 @@
         .total-price {
             font-size: 1.5em;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 30px 0 20px;
+            padding-top: 15px;
+            border-top: 2px solid #FF6700;
         }
 
         .btn {
@@ -179,6 +196,7 @@
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
+            gap: 15px;
         }
 
         @keyframes fadeIn {
@@ -194,8 +212,7 @@
 <body>
     <div class="container">
         <h1>KLOOK旅遊盲盒</h1>
-
-        <h2>K走Messy   Look for Mystery</h2>
+        <h2 class="subtitle">探索驚喜旅程</h2>
         
         <div id="selection-screen">
             <div class="city-selection">
@@ -226,24 +243,8 @@
         
         <div id="result-screen" class="result-container">
             <h2 id="result-city">你的旅遊盲盒</h2>
-            <div class="result-box">
-                <div class="result-item">
-                    <h3>高鐵票</h3>
-                    <p id="train-ticket">香港西九龍站 ↔ <span id="city-name">深圳</span>北站</p>
-                    <p class="original-price">價格: <span id="original-train-price">$75</span></p>
-                </div>
-                
-                <div class="result-item">
-                    <h3>活動體驗</h3>
-                    <p id="activity">深圳歡樂谷一日門票</p>
-                    <p class="original-price">價格: <span id="original-activity-price">$200</span></p>
-                </div>
-                
-                <div class="total-price">
-                    總價: <span class="original-price"><span id="total-original-price">$300</span></span>
-                    <br>
-                    <span class="discount-price"><span id="discount-rate">8折</span> 優惠價: <span id="total-discount-price">$240</span></span>
-                </div>
+            <div class="result-box" id="result-box">
+                <!-- 結果將由JavaScript動態生成 -->
             </div>
             
             <div class="button-group">
@@ -254,84 +255,108 @@
     </div>
 
     <script>
-        // 盲盒數據
+        // 盲盒數據（兩天一夜格式）
         const blindBoxData = {
             shenzhen: [
                 {
-                    trainTicket: "香港西九龍站 ↔ 深圳北站",
-                    trainPrice: 75,
-                    activity: "深圳敍宴 - 沉浸式中國古代宮廷盛宴",
-                    activityPrice: 350
+                    day1: {
+                        train: "高鐵去程：香港西九龍站 → 深圳北站",
+                        trainPrice: 75,
+                        activity: "深圳一日遊尋找客家文化（龍崗正埔嶺世居-甘坑小鎮-大芬油畫村-觀瀾古寺-鶴湖新居-觀瀾老墟）",
+                        activityPrice: 958,
+                        hotel: "酒店：深圳福田香格里拉",
+                        hotelPrice: 600
+                    },
+                    day2: {
+                        activity: "刺激1日遊活動：漂卡E族（卡丁車，射箭，攻防戰，戶外活動）",
+                        activityPrice: 180,
+                        returnTrain: "高鐵返程：深圳北站 → 香港西九龍站",
+                        returnTrainPrice: 75
+                    }
                 },
                 {
-                    trainTicket: "香港西九龍站 ↔ 深圳北站",
-                    trainPrice: 75,
-                    activity: "深圳最大滑雪場 卡魯冰雪世界門票",
-                    activityPrice: 105
-                },
-                {
-                    trainTicket: "香港西九龍站 ↔ 深圳北站",
-                    trainPrice: 75,
-                    activity: "漂卡E族（觀瀾湖運動公社卡丁車）",
-                    activityPrice: 73
-                },
-                {
-                    trainTicket: "香港西九龍站 ↔ 深圳北站 (商務座)",
-                    trainPrice: 200,
-                    activity: "深圳一日遊尋找客家文化（龍崗正埔嶺世居-甘坑小鎮-大芬油畫村-觀瀾古寺-鶴湖新居-觀瀾老墟）",
-                    activityPrice: 958
+                    day1: {
+                        train: "高鐵去程：香港西九龍站 → 福田站",
+                        trainPrice: 90,
+                        activity: "1日遊活動：深圳最大滑雪場 卡魯冰雪世界",
+                        activityPrice: 105,
+                        hotel: "酒店：深圳瑞吉酒店",
+                        hotelPrice: 800
+                    },
+                    day2: {
+                        activity: "1日遊活動：深圳敍宴 - 沉浸式中國古代宮廷盛宴",
+                        activityPrice: 80,
+                        returnTrain: "高鐵返程：福田站 → 香港西九龍站",
+                        returnTrainPrice: 350
+                    }
                 }
             ],
             guangzhou: [
                 {
-                    trainTicket: "香港西九龍站 ↔ 廣州南站",
-                    trainPrice: 220,
-                    activity: "廣州塔觀景門票",
-                    activityPrice: 324
+                    day1: {
+                        train: "高鐵去程：香港西九龍站 → 廣州南站",
+                        trainPrice: 220,
+                        activity: "1日遊活動：廣州出發清遠古龍峽 雲天玻霸 洞天仙境私人導覽",
+                        activityPrice: 703,
+                        hotel: "酒店：廣州四季酒店",
+                        hotelPrice: 800
+                    },
+                    day2: {
+                        activity: "1日遊活動：珠江夜遊",
+                        activityPrice: 120,
+                        returnTrain: "高鐵返程：廣州南站 → 香港西九龍站",
+                        returnTrainPrice: 220
+                    }
                 },
                 {
-                    trainTicket: "香港西九龍站 ↔ 廣州南站",
-                    trainPrice: 220,
-                    activity: "廣州出發清遠古龍峽 雲天玻霸 洞天仙境私人導覽一日遊",
-                    activityPrice: 703
-                },
-                {
-                    trainTicket: "香港西九龍站 ↔ 廣州南站",
-                    trainPrice: 220,
-                    activity: "珠江夜遊船票",
-                    activityPrice: 120
-                },
-                {
-                    trainTicket: "香港西九龍站 ↔ 廣州南站",
-                    trainPrice: 220,
-                    activity: "佛山祖廟 黃飛鴻紀念館 南風古灶 南越王博物館 私人導覽1日遊",
-                    activityPrice: 542
+                    day1: {
+                        train: "高鐵去程：香港西九龍站 → 廣州東站",
+                        trainPrice: 210,
+                        activity: "1日遊活動：佛山祖廟 黃飛鴻紀念館 南風古灶 南越王博物館 私人導覽1日遊",
+                        activityPrice: 542,
+                        hotel: "酒店：廣州文華東方",
+                        hotelPrice: 900
+                    },
+                    day2: {
+                        activity: "1日遊活動：北京路步行街 廣州塔觀景",
+                        activityPrice: 120,
+                        returnTrain: "高鐵返程：廣州東站 → 香港西九龍站",
+                        returnTrainPrice: 210
+                    }
                 }
             ],
             zhuhai: [
                 {
-                    trainTicket: "香港西九龍站 ↔ 珠海站",
-                    trainPrice: 250,
-                    activity: "珠海私人導覽1日遊 梅溪牌坊 圓明新園 珠海漁女 野狸島 珠海大劇院",
-                    activityPrice: 542
+                    day1: {
+                        train: "高鐵去程：香港西九龍站 → 珠海站",
+                        trainPrice: 150,
+                        activity: "1日遊活動：珠海長隆海洋王國",
+                        activityPrice: 350,
+                        hotel: "酒店：珠海瑞吉酒店",
+                        hotelPrice: 700
+                    },
+                    day2: {
+                        activity: "1日遊活動：私人導覽 梅溪牌坊 圓明新園 珠海漁女 野狸島 珠海大劇院",
+                        activityPrice: 542,
+                        returnTrain: "高鐵返程：珠海站 → 香港西九龍站",
+                        returnTrainPrice: 150
+                    }
                 },
                 {
-                    trainTicket: "香港西九龍站 ↔ 珠海站 ",
-                    trainPrice: 250,
-                    activity: "珠江夜遊",
-                    activityPrice: 112
-                },
-                {
-                    trainTicket: "香港西九龍站 ↔ 珠海站",
-                    trainPrice: 250,
-                    activity: "珠海私人導覽1日遊 情侶路 珠海漁女 香爐灣 景山公園 環島遊遊船",
-                    activityPrice: 653
-                },
-                {
-                    trainTicket: "香港西九龍站 ↔ 珠海站",
-                    trainPrice: 250,
-                    activity: "珠海長隆飛船樂園門票",
-                    activityPrice: 255
+                    day1: {
+                        train: "高鐵去程：香港西九龍站 → 珠海北站",
+                        trainPrice: 130,
+                        activity: "1日遊活動：私人導覽1日遊 情侶路 珠海漁女 香爐灣 景山公園 環島遊遊船",
+                        activityPrice: 653,
+                        hotel: "酒店：珠海仁恒洲際",
+                        hotelPrice: 750
+                    },
+                    day2: {
+                        activity: "1日遊活動：珠海長隆飛船樂園",
+                        activityPrice: 255,
+                        returnTrain: "高鐵返程：珠海北站 → 香港西九龍站",
+                        returnTrainPrice: 130
+                    }
                 }
             ]
         };
@@ -348,20 +373,11 @@
         const wheel = document.getElementById('wheel');
         const selectionScreen = document.getElementById('selection-screen');
         const resultScreen = document.getElementById('result-screen');
+        const resultBox = document.getElementById('result-box');
         const replayBtn = document.getElementById('replay-btn');
         const bookNowBtn = document.getElementById('book-now-btn');
         const cityRadios = document.querySelectorAll('input[name="city"]');
-        
-        // 結果顯示元素
         const resultCity = document.getElementById('result-city');
-        const cityName = document.getElementById('city-name');
-        const trainTicket = document.getElementById('train-ticket');
-        const originalTrainPrice = document.getElementById('original-train-price');
-        const activity = document.getElementById('activity');
-        const originalActivityPrice = document.getElementById('original-activity-price');
-        const totalOriginalPrice = document.getElementById('total-original-price');
-        const discountRate = document.getElementById('discount-rate');
-        const totalDiscountPrice = document.getElementById('total-discount-price');
 
         // 旋轉扭蛋按鈕事件
         wheel.addEventListener('click', function() {
@@ -391,7 +407,12 @@
                 const randomDiscount = discounts[Math.floor(Math.random() * discounts.length)];
                 
                 // 計算總價
-                const totalPrice = randomBox.trainPrice + randomBox.activityPrice;
+                const totalPrice = 
+                    randomBox.day1.trainPrice + 
+                    randomBox.day1.activityPrice + 
+                    randomBox.day1.hotelPrice +
+                    randomBox.day2.activityPrice +
+                    randomBox.day2.returnTrainPrice;
                 const discountedPrice = Math.round(totalPrice * randomDiscount.rate);
                 
                 // 更新顯示內容
@@ -401,15 +422,37 @@
                     zhuhai: "珠海"
                 };
                 
-                resultCity.textContent = `${cityNames[selectedCity]}旅遊盲盒`;
-                cityName.textContent = cityNames[selectedCity];
-                trainTicket.textContent = randomBox.trainTicket;
-                originalTrainPrice.textContent = `$${randomBox.trainPrice}`;
-                activity.textContent = randomBox.activity;
-                originalActivityPrice.textContent = `$${randomBox.activityPrice}`;
-                totalOriginalPrice.textContent = `$${totalPrice}`;
-                discountRate.textContent = randomDiscount.text;
-                totalDiscountPrice.textContent = `$${discountedPrice}`;
+                resultCity.textContent = `${cityNames[selectedCity]}兩天一夜旅遊盲盒`;
+                
+                // 生成結果內容
+                resultBox.innerHTML = `
+                    <div class="result-item">
+                        <h3>第一天</h3>
+                        <p>${randomBox.day1.train}</p>
+                        <p class="original-price">價格: <span>$${randomBox.day1.trainPrice}</span></p>
+                        
+                        <p>${randomBox.day1.activity}</p>
+                        <p class="original-price">價格: <span>$${randomBox.day1.activityPrice}</span></p>
+                        
+                        <p>${randomBox.day1.hotel}</p>
+                        <p class="original-price">價格: <span>$${randomBox.day1.hotelPrice}</span></p>
+                    </div>
+                    
+                    <div class="result-item">
+                        <h3>第二天</h3>
+                        <p>${randomBox.day2.activity}</p>
+                        <p class="original-price">價格: <span>$${randomBox.day2.activityPrice}</span></p>
+                        
+                        <p>${randomBox.day2.returnTrain}</p>
+                        <p class="original-price">價格: <span>$${randomBox.day2.returnTrainPrice}</span></p>
+                    </div>
+                    
+                    <div class="total-price">
+                        總價: <span class="original-price"><span>$${totalPrice}</span></span>
+                        <br>
+                        <span class="discount-price"><span>${randomDiscount.text}</span> 優惠價: <span>$${discountedPrice}</span></span>
+                    </div>
+                `;
                 
                 // 切換畫面
                 selectionScreen.style.display = 'none';
