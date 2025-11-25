@@ -1,482 +1,532 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KLOOK旅遊盲盒</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: white;
-            color: #333;
-            background-image: url('background.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chili Pulse Challenge</title>
+  <style>
+    :root {
+      --bg-image: none; /* Replace with url('assets/your-background.jpg') after adding the file */
+      --card-bg: rgba(12, 2, 0, 0.83);
+      --panel-bg: rgba(255, 255, 255, 0.08);
+      --accent: #ff4b2b;
+      --accent-dark: #b31200;
+      --success: #1ed185;
+      --warning: #ffba00;
+      --text-main: #fff5ee;
+      --text-muted: rgba(255, 255, 255, 0.75);
+    }
 
-        .container {
-            width: 90%;
-            max-width: 800px;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin: 30px 0;
-            text-align: center;
-        }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
 
-        h1 {
-            color: #FF6700;
-            margin-bottom: 10px;
-        }
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", "Noto Sans TC", sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      background-color: #110100;
+    }
 
-        .subtitle {
-            color: #FF6700;
-            font-size: 1.2em;
-            margin-top: -10px;
-            margin-bottom: 30px;
-            font-weight: normal;
-        }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-image:
+        linear-gradient(135deg, rgba(14, 2, 0, 0.95), rgba(64, 3, 3, 0.75)),
+        var(--bg-image);
+      background-size: cover;
+      background-position: center;
+      filter: blur(10px);
+      opacity: 0.75;
+    }
 
-        .city-selection {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at top, rgba(255, 126, 95, 0.35), transparent 55%);
+    }
 
-        .city-option {
-            margin: 0 15px;
-            cursor: pointer;
-            position: relative;
-        }
+    .a11y-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
 
-        .city-option input {
-            display: none;
-        }
+    .app-shell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(1rem, 5vw, 3rem);
+    }
 
-        .city-option label {
-            display: block;
-            padding: 10px 20px;
-            background-color: #f5f5f5;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+    .game-card {
+      width: min(960px, 96vw);
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+      padding: clamp(1.5rem, 3vw, 2.75rem);
+      backdrop-filter: blur(6px);
+    }
 
-        .city-option input:checked + label {
-            background-color: #FF6700;
-            color: white;
-        }
+    .card-header .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.35em;
+      font-size: 0.72rem;
+      color: var(--warning);
+      margin: 0 0 0.35rem;
+    }
 
-        .city-option .checkmark {
-            position: absolute;
-            bottom: -10px;
-            left: -10px;
-            width: 25px;
-            height: 25px;
-            display: none;
-        }
+    .card-header h1 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      margin: 0 0 0.4rem;
+    }
 
-        .city-option input:checked ~ .checkmark {
-            display: block;
-        }
+    .card-header .subtitle {
+      margin: 0 0 1.5rem;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
 
-        .machine-container {
-            position: relative;
-            margin: 30px auto;
-            width: 300px;
-            height: 400px;
-        }
+    .content-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(1.5rem, 3vw, 3rem);
+    }
 
-        .machine {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
+    .meter-column,
+    .message-panel {
+      flex: 1 1 280px;
+    }
 
-        .wheel {
-            position: absolute;
-            width: 80px;          /* 保持與旋鈕實際大小一致 */
-            height: 80px;
-            right: 105px;         /* 從原60px增加，向左移動 */
-            top: 260px;           /* 從原120px增加，向下移動 */
-            transform: rotate(0); /* 確保初始無旋轉 */
-            z-index: 10;          /* 確保旋鈕在機器圖層上方 */
-            cursor: pointer;
-            transition: transform 0.5s;
-        }
+    .meter-track-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
 
-        .wheel:hover {
-            transform: scale(1.1);
-        }
+    .meter-track {
+      width: 120px;
+      max-width: 45vw;
+      height: min(440px, 65vh);
+      min-height: 320px;
+      border-radius: 999px;
+      position: relative;
+      background: linear-gradient(to top, #ffe259 0%, #ffa751 20%, #ff512f 55%, #dd2476 75%, #7b4397 100%);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      overflow: hidden;
+      box-shadow:
+        inset 0 0 12px rgba(0, 0, 0, 0.35),
+        inset 0 0 0 2px rgba(0, 0, 0, 0.25);
+    }
 
-        .wheel.spin {
-            transform: rotate(180deg);
-        }
+    .meter-label {
+      position: absolute;
+      right: -78px;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    }
 
-        .result-container {
-            display: none;
-        }
+    .meter-label.mild {
+      bottom: -4px;
+    }
 
-        .result-box {
-            border: 2px dashed #FF6700;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: left;
-        }
+    .meter-label.medium {
+      bottom: 25%;
+      transform: translateY(50%);
+    }
 
-        .result-item {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
+    .meter-label.hot {
+      bottom: 50%;
+      transform: translateY(50%);
+    }
 
-        .result-item:last-child {
-            border-bottom: none;
-        }
+    .meter-label.extreme {
+      top: -4px;
+    }
 
-        .original-price {
-            text-decoration: line-through;
-            color: #999;
-            margin-left: 10px;
-        }
+    .target-zone {
+      position: absolute;
+      left: 12%;
+      width: 76%;
+      height: 80px;
+      bottom: 25%;
+      border: 2px dashed rgba(46, 255, 158, 0.95);
+      border-radius: 12px; /* 改为矩形 */
+      background: rgba(46, 255, 158, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: #baffde;
+      font-weight: 600;
+    }
 
-        .discount-price {
-            color: #FF6700;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
+    .target-zone span {
+      opacity: 0.9;
+    }
 
-        .total-price {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin: 30px 0 20px;
-            padding-top: 15px;
-            border-top: 2px solid #FF6700;
-        }
+    .chili-icon {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 30px;
+      pointer-events: none;
+    }
 
-        .btn {
-            background-color: #FF6700;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
-        }
+    .chili-icon::before,
+    .chili-icon::after {
+      content: "";
+      position: absolute;
+    }
 
-        .btn:hover {
-            background-color: #e55c00;
-            transform: translateY(-2px);
-        }
+    .chili-icon::before {
+      inset: 0;
+      background: linear-gradient(135deg, #ff1e56 0%, #cc0a34 65%);
+      border-radius: 55% 45% 65% 35%;
+      transform: rotate(12deg);
+      box-shadow: inset -2px -3px 4px rgba(0, 0, 0, 0.2);
+    }
 
-        .btn-secondary {
-            background-color: white;
-            color: #FF6700;
-            border: 2px solid #FF6700;
-            margin-left: 15px;
-        }
+    .chili-icon::after {
+      width: 12px;
+      height: 8px;
+      background: linear-gradient(90deg, #0b8c28, #0f5d1c);
+      border-radius: 40% 40% 0 0;
+      top: -4px;
+      left: 8px;
+      transform: rotate(-20deg);
+    }
 
-        .btn-secondary:hover {
-            background-color: #FFF5F0;
-        }
+    .button-row {
+      display: flex;
+      gap: 0.85rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
 
-        .button-group {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
+    button {
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 0.95rem 1.8rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+    button:focus-visible {
+      outline: 3px solid rgba(255, 255, 255, 0.6);
+      outline-offset: 3px;
+    }
 
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-    </style>
+    .stop-btn {
+      background: linear-gradient(135deg, var(--accent), #ff1e56);
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(255, 51, 51, 0.35);
+    }
+
+    .stop-btn:active:not(:disabled) {
+      transform: translateY(2px);
+    }
+
+    .stop-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      box-shadow: none;
+    }
+
+    .retry-btn {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .retry-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    #retryButton[hidden] {
+      display: none;
+    }
+
+    .message-panel {
+      background: var(--panel-bg);
+      border-radius: 22px;
+      padding: clamp(1.25rem, 3vw, 1.8rem);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .message-panel h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--warning);
+    }
+
+    .message-primary {
+      font-size: 1.15rem;
+      margin: 0;
+    }
+
+    .message-secondary {
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    .coupon {
+      border: 1px dashed rgba(255, 255, 255, 0.4);
+      border-radius: 18px;
+      padding: 1rem;
+      background: rgba(24, 255, 184, 0.12);
+      color: #cafff0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .coupon.hidden {
+      display: none;
+    }
+
+    .coupon .coupon-title {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .coupon .coupon-code {
+      font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .meter-label {
+        right: -70px;
+      }
+
+      .content-grid {
+        flex-direction: column;
+      }
+
+      .meter-track {
+        margin-bottom: 0.5rem;
+      }
+
+      .button-row {
+        justify-content: center;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>KLOOK旅遊盲盒</h1>
-        <h2 class="subtitle">K走Messy,    Look for Mystery</h2>
-        
-        <div id="selection-screen">
-            <div class="city-selection">
-                <div class="city-option">
-                    <input type="radio" id="shenzhen" name="city" value="shenzhen">
-                    <label for="shenzhen">深圳</label>
-                    <img src="pickedpig.png" class="checkmark" alt="已選">
-                </div>
-                <div class="city-option">
-                    <input type="radio" id="guangzhou" name="city" value="guangzhou">
-                    <label for="guangzhou">廣州</label>
-                    <img src="pickedpig.png" class="checkmark" alt="已選">
-                </div>
-                <div class="city-option">
-                    <input type="radio" id="zhuhai" name="city" value="zhuhai">
-                    <label for="zhuhai">珠海</label>
-                    <img src="pickedpig.png" class="checkmark" alt="已選">
-                </div>
+  <div id="instructions" class="a11y-only">
+    點擊 STOP 按鈕，在綠色目標區停住辣椒即可贏得優惠。
+  </div>
+
+  <main class="app-shell">
+    <section class="game-card" aria-labelledby="game-title" aria-describedby="instructions">
+      <header class="card-header">
+        <p class="eyebrow">BOB脆脆麵包雞油辣椒油</p>
+        <h1 id="game-title">BOB's Heat Zone</h1>
+        <p class="subtitle">BOB脆脆麵包雞油辣椒油,辣得正合你心意</p>
+      </header>
+
+      <div class="content-grid">
+        <div class="meter-column">
+          <div class="meter-track-wrapper">
+            <div class="meter-track" role="img" aria-label="Spice level meter from Mild to Extreme">
+              <div class="target-zone" aria-hidden="true">
+                <span>BOB's Heat Zone</span>
+              </div>
+              <div class="chili-icon" aria-hidden="true"></div>
+
+              <span class="meter-label mild">Mild</span>
+              <span class="meter-label medium">Medium</span>
+              <span class="meter-label hot">Hot</span>
+              <span class="meter-label extreme">Extreme</span>
             </div>
-            
-            <div class="machine-container">
-                <img src="machine.png" class="machine" alt="扭蛋機">
-                <img src="wheel.png" class="wheel" alt="旋轉扭蛋" id="wheel">
-            </div>
-            
-            <p>選擇城市後，點擊扭蛋機旋鈕抽取你的旅遊盲盒！</p>
+          </div>
+
+          <div class="button-row">
+            <button type="button" class="stop-btn" id="stopButton">STOP</button>
+            <button type="button" class="retry-btn" id="retryButton" hidden>再玩一次</button>
+          </div>
         </div>
-        
-        <div id="result-screen" class="result-container">
-            <h2 id="result-city">你的旅遊盲盒</h2>
-            <div class="result-box" id="result-box">
-                <!-- 結果將由JavaScript動態生成 -->
-            </div>
-            
-            <div class="button-group">
-                <button class="btn" id="replay-btn">重抽盲盒</button>
-                <button class="btn btn-secondary" id="book-now-btn">立即預訂</button>
-            </div>
+
+        <div class="message-panel" aria-live="polite">
+          <h2>Bottle of Bread, Beyond One Bite</h2>
+          <p class="message-primary" data-message-primary>點擊 STOP 停下辣椒！</p>
+          <p class="message-secondary" data-message-secondary>瞄準BOB's Heat Zone免費獲得一份BOB辣小食。</p>
+
+          <div class="coupon hidden" role="note">
+            <p class="coupon-title">BOB脆脆麵包雞油辣椒油使用剩餘麵包升級再造，唔止啱你口味，更加可以為環保出一份力！</p>
+          </div>
         </div>
-    </div>
+      </div>
+    </section>
+  </main>
 
-    <script>
-        // 盲盒數據（兩天一夜格式）
-        const blindBoxData = {
-            shenzhen: [
-                {
-                    day1: {
-                        train: "高鐵去程：香港西九龍站 → 深圳北站",
-                        trainPrice: 75,
-                        activity: "深圳一日遊尋找客家文化（龍崗正埔嶺世居-甘坑小鎮-大芬油畫村-觀瀾古寺-鶴湖新居-觀瀾老墟）",
-                        activityPrice: 958,
-                        hotel: "酒店：深圳福田香格里拉",
-                        hotelPrice: 600
-                    },
-                    day2: {
-                        activity: "刺激1日遊活動：漂卡E族（卡丁車，射箭，攻防戰，戶外活動）",
-                        activityPrice: 180,
-                        returnTrain: "高鐵返程：深圳北站 → 香港西九龍站",
-                        returnTrainPrice: 75
-                    }
-                },
-                {
-                    day1: {
-                        train: "高鐵去程：香港西九龍站 → 福田站",
-                        trainPrice: 90,
-                        activity: "1日遊活動：深圳最大滑雪場 卡魯冰雪世界",
-                        activityPrice: 105,
-                        hotel: "酒店：深圳瑞吉酒店",
-                        hotelPrice: 800
-                    },
-                    day2: {
-                        activity: "1日遊活動：深圳敍宴 - 沉浸式中國古代宮廷盛宴",
-                        activityPrice: 80,
-                        returnTrain: "高鐵返程：福田站 → 香港西九龍站",
-                        returnTrainPrice: 350
-                    }
-                }
-            ],
-            guangzhou: [
-                {
-                    day1: {
-                        train: "高鐵去程：香港西九龍站 → 廣州南站",
-                        trainPrice: 220,
-                        activity: "1日遊活動：廣州出發清遠古龍峽 雲天玻霸 洞天仙境私人導覽",
-                        activityPrice: 703,
-                        hotel: "酒店：廣州四季酒店",
-                        hotelPrice: 800
-                    },
-                    day2: {
-                        activity: "1日遊活動：珠江夜遊",
-                        activityPrice: 120,
-                        returnTrain: "高鐵返程：廣州南站 → 香港西九龍站",
-                        returnTrainPrice: 220
-                    }
-                },
-                {
-                    day1: {
-                        train: "高鐵去程：香港西九龍站 → 廣州東站",
-                        trainPrice: 210,
-                        activity: "1日遊活動：佛山祖廟 黃飛鴻紀念館 南風古灶 南越王博物館 私人導覽1日遊",
-                        activityPrice: 542,
-                        hotel: "酒店：廣州文華東方",
-                        hotelPrice: 900
-                    },
-                    day2: {
-                        activity: "1日遊活動：北京路步行街 廣州塔觀景",
-                        activityPrice: 120,
-                        returnTrain: "高鐵返程：廣州東站 → 香港西九龍站",
-                        returnTrainPrice: 210
-                    }
-                }
-            ],
-            zhuhai: [
-                {
-                    day1: {
-                        train: "高鐵去程：香港西九龍站 → 珠海站",
-                        trainPrice: 150,
-                        activity: "1日遊活動：珠海長隆海洋王國",
-                        activityPrice: 350,
-                        hotel: "酒店：珠海瑞吉酒店",
-                        hotelPrice: 700
-                    },
-                    day2: {
-                        activity: "1日遊活動：私人導覽 梅溪牌坊 圓明新園 珠海漁女 野狸島 珠海大劇院",
-                        activityPrice: 542,
-                        returnTrain: "高鐵返程：珠海站 → 香港西九龍站",
-                        returnTrainPrice: 150
-                    }
-                },
-                {
-                    day1: {
-                        train: "高鐵去程：香港西九龍站 → 珠海北站",
-                        trainPrice: 130,
-                        activity: "1日遊活動：私人導覽1日遊 情侶路 珠海漁女 香爐灣 景山公園 環島遊遊船",
-                        activityPrice: 653,
-                        hotel: "酒店：珠海仁恒洲際",
-                        hotelPrice: 750
-                    },
-                    day2: {
-                        activity: "1日遊活動：珠海長隆飛船樂園",
-                        activityPrice: 255,
-                        returnTrain: "高鐵返程：珠海北站 → 香港西九龍站",
-                        returnTrainPrice: 130
-                    }
-                }
-            ]
-        };
+  <script>
+    (function () {
+      const meterTrack = document.querySelector('.meter-track');
+      const chili = document.querySelector('.chili-icon');
+      const targetZone = document.querySelector('.target-zone');
+      const stopBtn = document.getElementById('stopButton');
+      const retryBtn = document.getElementById('retryButton');
+      const messagePrimary = document.querySelector('[data-message-primary]');
+      const messageSecondary = document.querySelector('[data-message-secondary]');
+      const coupon = document.querySelector('.coupon');
 
-        // 折扣選項
-        const discounts = [
-            { rate: 0.95, text: "95折" },
-            { rate: 0.9, text: "9折" },
-            { rate: 0.85, text: "85折" },
-            { rate: 0.8, text: "8折" }
-        ];
+      let animationId = null;
+      let lastTimestamp = null;
+      let position = 0;
+      let direction = 1;
+      let maxPosition = 0;
+      let targetStart = 0;
+      let targetEnd = 0;
+      const chiliHeight = 30;
+      const speed = 320; // pixels per second
+      const tolerance = 10; // ±10px lenient success margin
+      let autoResetTimer = null;
 
-        // DOM元素
-        const wheel = document.getElementById('wheel');
-        const selectionScreen = document.getElementById('selection-screen');
-        const resultScreen = document.getElementById('result-screen');
-        const resultBox = document.getElementById('result-box');
-        const replayBtn = document.getElementById('replay-btn');
-        const bookNowBtn = document.getElementById('book-now-btn');
-        const cityRadios = document.querySelectorAll('input[name="city"]');
-        const resultCity = document.getElementById('result-city');
+      function measure() {
+        maxPosition = Math.max(0, meterTrack.clientHeight - chiliHeight);
+        targetStart = targetZone.offsetTop;
+        targetEnd = targetStart + targetZone.offsetHeight;
+      }
 
-        // 旋轉扭蛋按鈕事件
-        wheel.addEventListener('click', function() {
-            // 檢查是否已選擇城市
-            let selectedCity = null;
-            cityRadios.forEach(radio => {
-                if (radio.checked) {
-                    selectedCity = radio.value;
-                }
-            });
-            
-            if (!selectedCity) {
-                alert('請先選擇一個城市！');
-                return;
-            }
-            
-            // 旋轉動畫
-            wheel.classList.add('spin');
-            
-            // 延遲顯示結果
-            setTimeout(() => {
-                // 隨機選擇盲盒
-                const cityData = blindBoxData[selectedCity];
-                const randomBox = cityData[Math.floor(Math.random() * cityData.length)];
-                
-                // 隨機選擇折扣
-                const randomDiscount = discounts[Math.floor(Math.random() * discounts.length)];
-                
-                // 計算總價
-                const totalPrice = 
-                    randomBox.day1.trainPrice + 
-                    randomBox.day1.activityPrice + 
-                    randomBox.day1.hotelPrice +
-                    randomBox.day2.activityPrice +
-                    randomBox.day2.returnTrainPrice;
-                const discountedPrice = Math.round(totalPrice * randomDiscount.rate);
-                
-                // 更新顯示內容
-                const cityNames = {
-                    shenzhen: "深圳",
-                    guangzhou: "廣州",
-                    zhuhai: "珠海"
-                };
-                
-                resultCity.textContent = `${cityNames[selectedCity]}兩天一夜旅遊盲盒`;
-                
-                // 生成結果內容
-                resultBox.innerHTML = `
-                    <div class="result-item">
-                        <h3>第一天</h3>
-                        <p>${randomBox.day1.train}</p>
-                        <p class="original-price">價格: <span>$${randomBox.day1.trainPrice}</span></p>
-                        
-                        <p>${randomBox.day1.activity}</p>
-                        <p class="original-price">價格: <span>$${randomBox.day1.activityPrice}</span></p>
-                        
-                        <p>${randomBox.day1.hotel}</p>
-                        <p class="original-price">價格: <span>$${randomBox.day1.hotelPrice}</span></p>
-                    </div>
-                    
-                    <div class="result-item">
-                        <h3>第二天</h3>
-                        <p>${randomBox.day2.activity}</p>
-                        <p class="original-price">價格: <span>$${randomBox.day2.activityPrice}</span></p>
-                        
-                        <p>${randomBox.day2.returnTrain}</p>
-                        <p class="original-price">價格: <span>$${randomBox.day2.returnTrainPrice}</span></p>
-                    </div>
-                    
-                    <div class="total-price">
-                        總價: <span class="original-price"><span>$${totalPrice}</span></span>
-                        <br>
-                        <span class="discount-price"><span>${randomDiscount.text}</span> 驚喜優惠價: <span>$${discountedPrice}</span></span>
-                    </div>
-                `;
-                
-                // 切換畫面
-                selectionScreen.style.display = 'none';
-                resultScreen.style.display = 'block';
-                resultScreen.classList.add('fade-in');
-                
-                // 重置旋鈕
-                setTimeout(() => {
-                    wheel.classList.remove('spin');
-                }, 500);
-            }, 500);
-        });
-        
-        // 重抽按鈕事件
-        replayBtn.addEventListener('click', function() {
-            resultScreen.style.display = 'none';
-            selectionScreen.style.display = 'block';
-            selectionScreen.classList.add('fade-in');
-        });
-        
-        // 立即預訂按鈕事件
-        bookNowBtn.addEventListener('click', function() {
-            window.location.href = "https://www.klook.com/";
-        });
-    </script>
+      function step(timestamp) {
+        if (!lastTimestamp) {
+          lastTimestamp = timestamp;
+        }
+        const delta = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+
+        position += direction * speed * delta;
+
+        if (position <= 0) {
+          position = 0;
+          direction = 1;
+        } else if (position >= maxPosition) {
+          position = maxPosition;
+          direction = -1;
+        }
+
+        chili.style.top = `${position}px`;
+        animationId = requestAnimationFrame(step);
+      }
+
+      function startRun() {
+        lastTimestamp = null;
+        direction = Math.random() > 0.5 ? 1 : -1;
+        animationId = requestAnimationFrame(step);
+        stopBtn.disabled = false;
+      }
+
+      function stopRun() {
+        if (animationId !== null) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+      }
+
+      function showIdleMessage() {
+        messagePrimary.textContent = '點擊 STOP 停低辣椒！';
+        messageSecondary.textContent = '瞄準綠色安全區獲得優惠。';
+      }
+
+      function evaluateResult() {
+        const chiliCenter = position + chiliHeight / 2;
+        const successStart = targetStart - tolerance;
+        const successEnd = targetEnd + tolerance;
+        const isSuccess = chiliCenter >= successStart && chiliCenter <= successEnd;
+
+        if (isSuccess) {
+          messagePrimary.textContent = '恭喜你又拯救咗一袋麵包啦！';
+          messageSecondary.textContent = '請在下方領取BOB辣椒油小食';
+          coupon.classList.remove('hidden');
+        } else {
+          messagePrimary.textContent = '哎呀，爭少少！';
+          messageSecondary.textContent = '試多次啦！';
+          coupon.classList.add('hidden');
+        }
+
+        retryBtn.hidden = false;
+        stopBtn.disabled = true;
+
+        if (autoResetTimer) {
+          clearTimeout(autoResetTimer);
+        }
+        autoResetTimer = setTimeout(() => {
+          resetGame();
+        }, 3000);
+      }
+
+      function resetGame() {
+        if (autoResetTimer) {
+          clearTimeout(autoResetTimer);
+          autoResetTimer = null;
+        }
+        stopRun();
+        measure();
+        position = Math.random() * maxPosition;
+        chili.style.top = `${position}px`;
+        retryBtn.hidden = true;
+        stopBtn.disabled = false;
+        coupon.classList.add('hidden');
+        showIdleMessage();
+        startRun();
+      }
+
+      stopBtn.addEventListener('click', () => {
+        if (animationId === null) return;
+        stopRun(); // immediate stop
+        evaluateResult();
+      });
+
+      retryBtn.addEventListener('click', () => {
+        resetGame();
+      });
+
+      window.addEventListener('resize', () => {
+        const running = animationId !== null;
+        measure();
+        position = Math.min(position, maxPosition);
+        chili.style.top = `${position}px`;
+        if (!running && stopBtn.disabled === false) {
+          // keep state intact when not in motion
+        }
+      });
+
+      resetGame();
+    })();
+  </script>
 </body>
 </html>
